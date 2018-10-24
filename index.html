@@ -1,0 +1,130 @@
+<html>
+
+<head>
+
+    <link href="sandbox.css" rel="stylesheet" />
+    <link rel="stylesheet" href="http://codemirror.net/lib/codemirror.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="http://codemirror.net/lib/codemirror.js"></script>
+    <script src="webtoolkit.md5.js"></script>
+    <!-- For HTML/XML -->
+    <script src="http://codemirror.net/mode/xml/xml.js"></script>
+    <script src="http://codemirror.net/mode/htmlmixed/htmlmixed.js"></script>
+    <!-- For CSS -->
+    <script src="http://codemirror.net/mode/css/css.js"></script>
+    <!-- For JS -->
+    <script src="http://codemirror.net/mode/javascript/javascript.js"></script>
+    <link rel="stylesheet" href="http://codemirror.net/lib/codemirror.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/3024-day.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/3024-night.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/ambiance.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/base16-dark.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/base16-light.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/blackboard.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/cobalt.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/eclipse.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/elegant.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/erlang-dark.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/lesser-dark.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/midnight.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/monokai.css">
+    <link rel="stylesheet" href="http://codemirror.net/theme/neat.css">
+</head>
+<div id="wrap">
+    <!-- Code Editors -->
+    <section id="code_editors">
+        <script>
+            var currentEditor = 'readmeTab';
+
+function openTab(evt, tabName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += "active";
+    currentEditor = tabName;
+}
+</script>
+        <!-- Tab links -->
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'htmlTab')">&#60;&#62;</button>
+            <button class="tablinks" onclick="openTab(event, 'cssTab')">&#123;&#125;</button>
+            <button class="tablinks" onclick="openTab(event, 'jsTab')">js</button>
+            <button class="tablinks" onclick="openTab(event, 'readmeTab')">&#x1f3f7;</button>
+            <button class="tablinks" onclick="openTab(event, 'filesTab')">&#x1f4c2;</button>
+            <!-- art palette - U+1F3A8 -->
+
+            <button class="save" onclick="save()">&#x1f4be;</button>
+            <button class="fork" onclick="fork()">🍝</button>
+            <button class="undo" onclick="undo(currentEditor)">&#x1f631;</button>
+            <button class="render" onclick="render()">&#9654;</button>
+        </div>
+        <!-- Tab content -->
+        <div id="htmlTab" class="tabcontent">
+            <div id="html" class="code_box">
+                <textarea name="html"></textarea>
+            </div>
+        </div>
+        <div id="cssTab" class="tabcontent">
+            <div id="css" class="code_box">
+                <textarea name="css"></textarea>
+            </div>
+        </div>
+        <div id="jsTab" class="tabcontent">
+            <div id="js" class="code_box">
+                <textarea name="js"></textarea>
+            </div>
+        </div>
+        <div id="readmeTab" class="tabcontent">
+            <div id="readme" class="code_box">
+                <textarea name="readme"></textarea>
+            </div>
+        </div>
+        <div id="filesTab" class="tabcontent">
+            <div id="files" class="file_box">
+                <button class="file"><h1>👤</h1><br>MyCoolProject</button><button class="file"><h1>👤</h1><br>MyCoolProject2</button>
+            </div>
+        </div>
+    </section>
+    <!-- Sandboxing -->
+    <section id="output">
+        <iframe></iframe>
+    </section>
+</div>
+<div id="sandbox">press play to launch console</div>
+<!-- The sandbox template -->
+<script type="text/template" id="tplSandbox">
+    <pre class="output"></pre>
+	<div class="input">
+		<textarea rows="1" placeholder="<%= placeholder %>"></textarea>
+	</div>
+</script>
+<!-- The command/result template (NB whitespace/line breaks matter inside <pre> tag): -->
+<script type="text/template" id="tplCommand"><% if (! _hidden) { %><span class="command"><%= command %></span>
+<span class="prefix"><%= this.resultPrefix %></span><span class="<%= _class %>"><%= result %></span>
+<% } %></script>
+<script src="/libs/underscore.min.js"></script>
+<script src="/libs/backbone.min.js"></script>
+<script src="/libs/backbone-localstorage.min.js"></script><!-- opt -->
+<script src="/libs/jquery.min.js"></script>
+<script src="/sandbox-console.js"></script>
+<script type="text/javascript">
+</script>
+<script src="script.js"></script>
+</div>
+</body>
+
+</html>
