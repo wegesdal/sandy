@@ -32,13 +32,13 @@
     , ts = CURRENT_TIMESTAMP
     , avatar = '$avatar'
     , html = '$html'
-    , css = '$css',
-    js = '$js',
-    password = '$password',
-    tags = '$tags',
-    parent = '$parent'
+    , css = '$css'
+    , js = '$js'
+    , password = '$password'
+    , tags = '$tags'
+    , parent = '$parent'
     ON DUPLICATE KEY UPDATE
-    ts = if('$password'=password,CURRENT_TIMESTAMP,ts), html = if('$password'=password,'$html',html), css = if('$password'=password,'$css',css), js = if('$password'=password,'$js',js), tags = if('$password'=password,'$tags',tags), parent = if('$password'=password,'$parent',parent);";
+    ts = if('$password'=password,CURRENT_TIMESTAMP,ts), html = if('$password'=password,'$html',html), css = if('$password'=password,'$css',css), js = if('$password'=password,'$js',js), tags = if('$password'=password,'$tags',tags);";
     }
    	if ($conn->query($sql) === TRUE) {
         echo "🖖";

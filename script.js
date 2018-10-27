@@ -193,9 +193,8 @@ var changeTheme = function() {
       + obj.password 
       + '",\n"tags": "'
       + obj.tags
-      + '",\n"tags": "'
-      + obj.parent
       + '",\n"parent": "'
+      + obj.parent
       + '"\n}');
     if (currentThemeIndex < themes.length - 1) {
         currentThemeIndex++;
@@ -265,7 +264,6 @@ function openTab(evt, tabName) {
 
 var toggle = function(evt, tabName) {
     var t = document.getElementById(tabName);
-    console.log(tabName)
     if (t.style.display === "none") {
         t.style.display = "block";
     } else {
@@ -296,6 +294,7 @@ var load = function() {
     $.get('load.php', {}, function(data) {
         //data comes in as a string holding an array of JSON objects
         var fileString = data;
+        console.log(fileString)
         //eval returns the array 
         files = eval(fileString);
         var folder = document.getElementById('files');
@@ -334,7 +333,6 @@ var load = function() {
                   + this.getAttribute('parent')
                   +'"\n}');
                 initTitle = this.title;
-                console.log(initTitle)
                 initParent = this.parent;
                 render();
             })
@@ -359,7 +357,6 @@ readmeEditor.setValue('{\n"title": "untitled",\n"creator": "anonymous",\n"avatar
 //js editor begins as an empty vessel
 
 var save = function() {
-    console.log('saving');
     var html = Base64.encode(htmlEditor.getValue());
     var css = Base64.encode(cssEditor.getValue());
     var js = Base64.encode(jsEditor.getValue());
@@ -368,14 +365,10 @@ var save = function() {
     var hash = MD5(stringToHash);
     var t;
     if (obj.title != initTitle) {
-        console.log('titles do not match')
-        console.log(initTitle)
         $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initTitle, hash: hash }, function(data) { alert(data); });
 
     }
     else {
-        console.log('titles match')
-        console.log(initParent)
         $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initParent, hash: hash }, function(data) { alert(data); });
 
     }
