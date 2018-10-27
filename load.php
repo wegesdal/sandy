@@ -17,7 +17,7 @@
     for($i = 0; $i < $result_length; $i++)
     {
         $row = mysqli_fetch_array($result);
-        $arr = array('title' => $row['title'], 'creator' => $row['creator'], 'avatar' => $row['avatar'], 'html' => $row['html'], 'css' => $row['css'], 'js' => $row['js'], 'readme' => $row['readme']);
+        $arr = array('title' => $row['title'], 'creator' => $row['creator'], 'avatar' => $row['avatar'], 'html' => $row['html'], 'css' => $row['css'], 'js' => $row['js'], 'readme' => $row['readme'], 'tags' => $row['tags'], 'parent' => $row['parent']);
         echo (json_encode($arr));
         if ($i < $result_length-1){
             echo(',');

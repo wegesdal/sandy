@@ -1,5 +1,5 @@
 // Copyright Will Egesdal (c) 2018
-//
+// mit license
 //
 // Acknowledgements: CodeMirror, Rishabh (CodeTheory), Javascript-Sandbox-Console (openexchangerates.com, 
 //
@@ -12,6 +12,7 @@ var jsSource;
 //
 // Rishabh, CodeTheory (author of CSSDeck.com):
 //
+
 
 // Base template
 var base_tpl =
@@ -101,8 +102,19 @@ var render = function() {
 
     });
     window.sandbox.setValue(jsSource)
-};
 
+    //this hack simulates a console log in the iframe and logs it to the real console. 
+    //todo: in a loop it will only log the last item in the virtual console
+
+    window.sandbox.model.sandbox.console = { 
+    log: function(msg) {
+
+      console.log(msg);
+      return msg;
+    }   
+  };
+
+};
 
 var themes = ['3024-day', '3024-night', 'abcdef', 'ambiance-mobile',
     'ambiance', 'base16-dark', 'base16-light', 'bespin', 'blackboard',
@@ -118,24 +130,22 @@ var themes = ['3024-day', '3024-night', 'abcdef', 'ambiance-mobile',
     'twilight', 'vibrant-ink', 'xq-dark', 'xq-light', 'yeti', 'zenburn'
 ]
 
-
 var emojiArray = [
 
-    '🐣', '🦖', '🦆', '🐩', '🐺', '🦑', '🐢', '🐻', '🐛', '🦕',
-    '🃏', '🧛', '🐬', '🐨', '🐱', '🌚', '🦉', '🦄', '🐗', '🦃',
-    '🐲', '🧠', '👩‍🎤', '🗿', '🐅', '🦈', '🤖', '🐡', '🔬',
-    '👹', '🐴', '🐮', '💎', '😈', '🐋', '🐷', '🐙', '🐹', '🐊',
+    '🐣', '🦖', '🦆', '🐩', '🐺', '🦑', '🐢', '🐻', '🍱', '🦕',
+    '🚂', '🧛', '🐬', '🐨', '🐱', '🃏', '🦉', '🦄', '🐗', '🦃',
+    '🐛', '🧠', '👩‍🎤', '🗿', '🐅', '🦈', '🤖', '🐡', '🔬',
+    '🐸', '🐴', '🐮', '💎', '😈', '🐋', '🐷', '🐙', '🐹', '🐊',
     '🦅', '🧞‍♀️', '🤷', '🦋', '🍭', '🍔', '👾', '🦊', '🥀',
     '🧝‍♀️', '🧟', '🐝', '👽', '🐓', '🐰', '🍪'
 ]
 
-
 var emojiCodePointArray = [
 
-    "&#x1F423;", "&#x1F996;", "&#x1F986;", "&#x1F429;", "&#x1F43A;", "&#x1F991;", "&#x1F422;", "&#x1F43B;", "&#x1F41B;", "&#x1F995;",
-    "&#x1F0CF;", "&#x1F9DB;", "&#x1F42C;", "&#x1F428;", "&#x1F431;", "&#x1F31A;", "&#x1F989;", "&#x1F984;", "&#x1F417;", "&#x1F983;",
-    "&#x1F432;", "&#x1F9E0;", "&#x1F469;&#x200d;&#x1F3A4;", "&#x1F5FF;", "&#x1F405;", "&#x1F988;", "&#x1F916;", "&#x1F421;", "&#x1F52C;",
-    "&#x1F479;", "&#x1F434;", "&#x1F42E;", "&#x1F48E;", "&#x1F608;", "&#x1F40B;", "&#x1F437;", "&#x1F419;", "&#x1F439;", "&#x1F40A;",
+    "&#x1F423;", "&#x1F996;", "&#x1F986;", "&#x1F429;", "&#x1F43A;", "&#x1F991;", "&#x1F422;", "&#x1F43B;", "&#x1F371;", "&#x1F995;",
+    "&#x1F682;", "&#x1F9DB;", "&#x1F42C;", "&#x1F428;", "&#x1F431;", "&#x1F0CF;", "&#x1F989;", "&#x1F984;", "&#x1F417;", "&#x1F983;",
+    "&#x1F41B;", "&#x1F9E0;", "&#x1F469;&#x200d;&#x1F3A4;", "&#x1F5FF;", "&#x1F405;", "&#x1F988;", "&#x1F916;", "&#x1F421;", "&#x1F52C;",
+    "&#x1F438;", "&#x1F434;", "&#x1F42E;", "&#x1F48E;", "&#x1F608;", "&#x1F40B;", "&#x1F437;", "&#x1F419;", "&#x1F439;", "&#x1F40A;",
     "&#x1F985;", "&#x1F9DE;&#x200d;&#x2640;", "&#x1F937;", "&#x1F98B;", "&#x1F36D;", "&#x1F354;", "&#x1F47E;", "&#x1F98A;", "&#x1F940;",
     "&#x1F9DD;&#x200d;&#x2640;", "&#x1F9DF;", "&#x1F41D;", "&#x1F47D;", "&#x1F413;", "&#x1F430;", "&#x1F36A;"
 ]
@@ -169,9 +179,24 @@ var changeTheme = function() {
     cssEditor.setOption("theme", themes[currentThemeIndex]);
     jsEditor.setOption("theme", themes[currentThemeIndex]);
     readmeEditor.setOption("theme", themes[currentThemeIndex]);
+    console.log(readmeEditor)
     var obj = JSON.parse(readmeEditor.getValue());
     obj.avatar = emojiArray[currentThemeIndex]
-    readmeEditor.setValue('{\n"title": "' + obj.title + '",\n"creator": "' + obj.creator + '",\n"avatar": "' + obj.avatar + '",\n"password": "' + obj.password + '"\n}');
+    readmeEditor.setValue(
+      '{\n"title": "'
+      + obj.title 
+      + '",\n"creator": "' 
+      + obj.creator 
+      + '",\n"avatar": "' 
+      + obj.avatar 
+      + '",\n"password": "' 
+      + obj.password 
+      + '",\n"tags": "'
+      + obj.tags
+      + '",\n"tags": "'
+      + obj.parent
+      + '",\n"parent": "'
+      + '"\n}');
     if (currentThemeIndex < themes.length - 1) {
         currentThemeIndex++;
     } else {
@@ -265,10 +290,13 @@ var undo = function(currentTab) {
     editor.execCommand('undo');
 }
 
+var initTitle;
 var files = [];
 var load = function() {
     $.get('load.php', {}, function(data) {
+        //data comes in as a string holding an array of JSON objects
         var fileString = data;
+        //eval returns the array 
         files = eval(fileString);
         var folder = document.getElementById('files');
         while (folder.firstChild) {
@@ -285,14 +313,29 @@ var load = function() {
             btn.setAttribute('css', fileData.css);
             btn.setAttribute('js', fileData.js);
             btn.setAttribute('readme', fileData.readme);
+            btn.setAttribute('tags', fileData.tags);
+            btn.setAttribute('parent', fileData.parent);
             btn.setAttribute('id', fileData.title);
             btn.addEventListener('click', function() {
-                // if console is closed , open it to prevent ui bug and confusion over loading script
-                var t = document.getElementById('sandbox');
                 htmlEditor.setValue(Base64.decode(this.getAttribute('html')));
                 cssEditor.setValue(Base64.decode(this.getAttribute('css')));
                 jsEditor.setValue(Base64.decode(this.getAttribute('js')));
-                readmeEditor.setValue('{\n"title": "' + this.getAttribute('title') + '",\n"creator": "' + this.getAttribute('creator') + '",\n"avatar": "' + this.getAttribute('avatar') + '",\n"password": ""\n}');
+                readmeEditor.setValue(
+                  '{\n"title": "' 
+                  + this.getAttribute('title') 
+                  + '",\n"creator": "' 
+                  + this.getAttribute('creator') 
+                  + '",\n"avatar": "' 
+                  + this.getAttribute('avatar') 
+                  + '",\n"password": "'
+                  + '",\n"tags": "'
+                  + this.getAttribute('tags')
+                  + '",\n"parent": "'
+                  + this.getAttribute('parent')
+                  +'"\n}');
+                initTitle = this.title;
+                console.log(initTitle)
+                initParent = this.parent;
                 render();
             })
             var h = document.createElement("H1") // Create a <h1> element for avatar
@@ -303,14 +346,16 @@ var load = function() {
             btn.appendChild(t);
             btn.style = 'display:initial'
             folder.appendChild(btn);
-
         }
     });
 }
 
+//clean document settings
+// initParent = 'origin';
+// initTitle = 'untitled';
 htmlEditor.setValue('<p>Hello World</p>');
 cssEditor.setValue('body { color: red; background: white }');
-readmeEditor.setValue('{\n"title": "untitled",\n"creator": "anonymous",\n"avatar": "' + String.fromCodePoint(0x1F464) + '",\n"password": ""\n}');
+readmeEditor.setValue('{\n"title": "untitled",\n"creator": "anonymous",\n"avatar": "' + String.fromCodePoint(0x1F464) + '",\n"password": "",\n' + '"tags": "",\n"parent": ""\n}');
 //js editor begins as an empty vessel
 
 var save = function() {
@@ -321,14 +366,26 @@ var save = function() {
     var obj = JSON.parse(readmeEditor.getValue());
     var stringToHash = obj.title + obj.creator + obj.password + "molly";
     var hash = MD5(stringToHash);
-    $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, hash: hash }, function(data) { alert(data); });
+    var t;
+    if (obj.title != initTitle) {
+        console.log('titles do not match')
+        console.log(initTitle)
+        $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initTitle, hash: hash }, function(data) { alert(data); });
+
+    }
+    else {
+        console.log('titles match')
+        console.log(initParent)
+        $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initParent, hash: hash }, function(data) { alert(data); });
+
+    }
+    
 }
 
 var cms = document.querySelectorAll('.CodeMirror');
 for (var i = 0; i < cms.length; i++) {
     cms[i].style.height = '100%';
-}
-
+} 
 
 //This code is necessary to prevent a UI bug when opening the console directly after opening the page but before clicking a text editor
 // A $( document ).ready() block.

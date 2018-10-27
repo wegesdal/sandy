@@ -8,6 +8,8 @@
      $css = $_POST['css'];
      $js = $_POST['js'];
      $password = $_POST['password'];
+     $tags = $_POST['tags'];
+     $parent = $_POST['parent'];
      $hash = $_POST['hash'];
 
      if ($mysqli->connect_errno) {
@@ -32,9 +34,11 @@
     , html = '$html'
     , css = '$css',
     js = '$js',
-    password = '$password'
+    password = '$password',
+    tags = '$tags',
+    parent = '$parent'
     ON DUPLICATE KEY UPDATE
-    ts = if('$password'=password,CURRENT_TIMESTAMP,ts), html = if('$password'=password,'$html',html), css = if('$password'=password,'$css',css), js = if('$password'=password,'$js',js);";
+    ts = if('$password'=password,CURRENT_TIMESTAMP,ts), html = if('$password'=password,'$html',html), css = if('$password'=password,'$css',css), js = if('$password'=password,'$js',js), tags = if('$password'=password,'$tags',tags), parent = if('$password'=password,'$parent',parent);";
     }
    	if ($conn->query($sql) === TRUE) {
         echo "🖖";
