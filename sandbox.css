@@ -39,7 +39,7 @@
 #sandbox pre.output {
 	display:block;
 	width:100%;
-	height:50%;
+	height:75%;
 	overflow-y:auto;
 	position:relative;
 	padding:0;
@@ -71,6 +71,7 @@
 	resize: none;
 	width:100%;
 	overflow:hidden;
+	height: 1.3em;
 }
 #sandbox textarea:focus {
 	outline:0 none;
