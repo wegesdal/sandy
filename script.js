@@ -264,10 +264,19 @@ function openTab(evt, tabName) {
 
 var toggle = function(evt, tabName) {
     var t = document.getElementById(tabName);
+    var o = document.getElementById('output');
     if (t.style.display === "none") {
         t.style.display = "block";
     } else {
         t.style.display = "none";
+    }
+    if (tabName == 'sandbox') {
+        if (t.style.display === "none") {
+            o.style.filter = "none"
+        }
+        if (t.style.display === "block"){
+            o.style.filter = "blur(5px)"
+        }
     }
 }
 
