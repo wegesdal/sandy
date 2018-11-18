@@ -3,8 +3,6 @@
 //
 // Acknowledgements: CodeMirror, Rishabh (CodeTheory), Javascript-Sandbox-Console (openexchangerates.com, 
 //
-//
-//
 
 //i have to make jsSource global so i can inject into the console sandbox to evaluate errors
 var jsSource;
@@ -12,7 +10,6 @@ var jsSource;
 //
 // Rishabh, CodeTheory (author of CSSDeck.com):
 //
-
 
 // Base template
 var base_tpl =
@@ -26,6 +23,8 @@ var base_tpl =
     "</body>\n" +
     "</html>";
 
+
+
 var prepareSource = function() {
     var html = htmlEditor.getValue(),
         css = cssEditor.getValue(),
@@ -34,10 +33,8 @@ var prepareSource = function() {
     src = '';
 
     jsSource = js;
-    if (jsSource.length > 0) {
-      var s = document.getElementById('sandbox');
-      s.style.display = "block";
-    }
+    var s = document.getElementById('sandbox');
+    s.style.display = "none";
 
     // HTML
     src = base_tpl.replace('</body>', html + '</body>');
@@ -48,20 +45,13 @@ var prepareSource = function() {
     return src;
 };
 
-var render = function() {
-    var t = document.getElementById('output');
-    if (t.style.display === "none") {
-        t.style.display = "block";
-    }
-    var p = document.getElementById('sandbox');
-    if (p.style.display === "none") {
-        p.style.display = "block";
-    }
+var render = function(callback) {
     var source = prepareSource();
 
     //we need to kill old frame to release phaser resources >.<
     var oldFrame = document.querySelector('#output iframe');
     oldFrame.parentNode.removeChild(oldFrame);
+
     newFrame = document.createElement('iframe');
     var output = document.querySelector('#output');
     output.appendChild(newFrame), iframe_doc = newFrame.contentDocument;
@@ -70,15 +60,14 @@ var render = function() {
     //from:  this.sandboxFrame = $('<iframe width="0" height="0"/>').css({visibility : 'hidden'}).appendTo('body')[0];
     //to:    this.sandboxFrame = document.querySelector('#output iframe');
 
+    newFrame.onload = function(){callback();};
     iframe_doc.open();
     iframe_doc.write(source);
     iframe_doc.close();
+    newFrame.contentWindow.focus();
+};
 
-    //
-    // javascript-sandbox-console docs:
-    //
-    //
-
+var makeConsole = function() {
     jQuery(document).ready(function($) {
         // Create the sandbox:
         window.sandbox = new Sandbox.View({
@@ -101,19 +90,19 @@ var render = function() {
         //this also simulates the order that pages load and simulates the experience of using a console to run programs
 
     });
-    window.sandbox.setValue(jsSource)
+    console.log(jsSource);
+    window.sandbox.model.iframeEval(jsSource);
 
     //this hack simulates a console log in the iframe and logs it to the real console. 
     //todo: in a loop it will only log the last item in the virtual console
 
-    window.sandbox.model.sandbox.console = { 
-    log: function(msg) {
+    window.sandbox.model.sandbox.console = {
+        log: function(msg) {
 
-      console.log(msg);
-      return msg;
-    }   
-  };
-
+            console.log(msg);
+            return msg;
+        }
+    };
 };
 
 var themes = ['3024-day', '3024-night', 'abcdef', 'ambiance-mobile',
@@ -128,7 +117,7 @@ var themes = ['3024-day', '3024-night', 'abcdef', 'ambiance-mobile',
     'shadowfox', 'solarized', 'ssms', 'the-matrix',
     'tomorrow-night-bright', 'tomorrow-night-eighties', 'ttcn',
     'twilight', 'vibrant-ink', 'xq-dark', 'xq-light', 'yeti', 'zenburn'
-]
+];
 
 var emojiArray = [
 
@@ -138,7 +127,7 @@ var emojiArray = [
     '🐸', '🐴', '🐮', '💎', '😈', '🐋', '🐷', '🐙', '🐹', '🐊',
     '🦅', '🧞‍♀️', '🤷', '🦋', '🍭', '🍔', '👾', '🦊', '🥀',
     '🧝‍♀️', '🧟', '🐝', '👽', '🐓', '🐰', '🍪'
-]
+];
 
 var emojiCodePointArray = [
 
@@ -148,7 +137,7 @@ var emojiCodePointArray = [
     "&#x1F438;", "&#x1F434;", "&#x1F42E;", "&#x1F48E;", "&#x1F608;", "&#x1F40B;", "&#x1F437;", "&#x1F419;", "&#x1F439;", "&#x1F40A;",
     "&#x1F985;", "&#x1F9DE;&#x200d;&#x2640;", "&#x1F937;", "&#x1F98B;", "&#x1F36D;", "&#x1F354;", "&#x1F47E;", "&#x1F98A;", "&#x1F940;",
     "&#x1F9DD;&#x200d;&#x2640;", "&#x1F9DF;", "&#x1F41D;", "&#x1F47D;", "&#x1F413;", "&#x1F430;", "&#x1F36A;"
-]
+];
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -159,49 +148,39 @@ var currentThemeIndex = getRandomInt(0, 54);
 var cm_opt = {
     mode: 'text/html',
     theme: themes[currentThemeIndex],
-    gutter: false,
+    gutters: ["CodeMirror-lint-markers"],
     lineNumbers: true,
-    //TODO: this is where i turn on the linter
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
+    lint: true
 };
 
 var changeTheme = function() {
-    console.log(emojiArray[currentThemeIndex]);
     $("#theme").html(emojiCodePointArray[currentThemeIndex]);
     htmlEditor.setOption("theme", themes[currentThemeIndex]);
     cssEditor.setOption("theme", themes[currentThemeIndex]);
     jsEditor.setOption("theme", themes[currentThemeIndex]);
     readmeEditor.setOption("theme", themes[currentThemeIndex]);
-    console.log(readmeEditor)
     var obj = JSON.parse(readmeEditor.getValue());
-    obj.avatar = emojiArray[currentThemeIndex]
+    obj.avatar = emojiArray[currentThemeIndex];
     readmeEditor.setValue(
-      '{\n"title": "'
-      + obj.title 
-      + '",\n"creator": "' 
-      + obj.creator 
-      + '",\n"avatar": "' 
-      + obj.avatar 
-      + '",\n"password": "' 
-      + obj.password 
-      + '",\n"tags": "'
-      + obj.tags
-      + '",\n"parent": "'
-      + obj.parent
-      + '"\n}');
+      '{\n"title": "' +
+      obj.title +
+      '",\n"creator": "' +
+      obj.creator +
+      '",\n"avatar": "' +
+      obj.avatar +
+      '",\n"password": "' +
+      obj.password +
+      '",\n"tags": "' +
+      obj.tags +
+      '",\n"parent": "' +
+      obj.parent +
+      '"\n}');
     if (currentThemeIndex < themes.length - 1) {
         currentThemeIndex++;
     } else {
         currentThemeIndex = 0;
     }
-}
+};
 
 cm = CodeMirror;
 
@@ -234,7 +213,11 @@ var currentEditor = 'readmeTab';
 //this is the change tab function o.O
 function openTab(evt, tabName) {
     if (tabName === 'filesTab') {
-        load()
+        load();
+    }
+
+    if (tabName === 'picsTab') {
+        list();
     }
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -262,6 +245,34 @@ function openTab(evt, tabName) {
     readmeEditor.refresh();
 }
 
+function initializeWith(startingTab) {
+    if (startingTab === 'filesTab') {
+        load();
+    }
+
+    if (startingTab === 'picsTab') {
+        list();
+    }
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(startingTab).style.display = "block";
+    currentEditor = startingTab;
+
+
+}
+
 var toggle = function(evt, tabName) {
     var t = document.getElementById(tabName);
     var o = document.getElementById('output');
@@ -272,13 +283,13 @@ var toggle = function(evt, tabName) {
     }
     if (tabName == 'sandbox') {
         if (t.style.display === "none") {
-            o.style.filter = "none"
+            o.style.filter = "none";
         }
         if (t.style.display === "block"){
-            o.style.filter = "blur(5px)"
+            o.style.filter = "blur(2px)";
         }
     }
-}
+};
 
 var undo = function(currentTab) {
     var editor;
@@ -295,21 +306,47 @@ var undo = function(currentTab) {
         return;
     }
     editor.execCommand('undo');
-}
+};
 
 var initTitle;
 var files = [];
+
+var list = function() {
+    $.get('list.php', {}, function(data) {
+        console.log(data);
+        var folder = document.getElementById('assets');
+        while (folder.firstChild) {
+            folder.removeChild(folder.firstChild);
+        }
+        var pathHeader = document.createElement("h3");
+        var pathHeaderText = document.createTextNode('assets/')
+        pathHeader.appendChild(pathHeaderText);
+        folder.appendChild(pathHeader);
+        var ul = document.createElement("ul");
+        folder.appendChild(ul)
+        var assets = eval(data);
+        for(var i = 0; i < assets.length; i++) 
+        {
+
+        var li = document.createElement("li");
+        var t = document.createTextNode(assets[i]);
+        li.appendChild(t);
+        ul.appendChild(li);
+
+        }
+    });
+};
+
 var load = function() {
     $.get('load.php', {}, function(data) {
         //data comes in as a string holding an array of JSON objects
         var fileString = data;
-        console.log(fileString)
         //eval returns the array 
         files = eval(fileString);
         var folder = document.getElementById('files');
         while (folder.firstChild) {
             folder.removeChild(folder.firstChild);
-        };
+        }
         for (var i = 0; i < files.length; i++) {
             fileData = files[i];
             var btn = document.createElement('BUTTON');
@@ -329,33 +366,33 @@ var load = function() {
                 cssEditor.setValue(Base64.decode(this.getAttribute('css')));
                 jsEditor.setValue(Base64.decode(this.getAttribute('js')));
                 readmeEditor.setValue(
-                  '{\n"title": "' 
-                  + this.getAttribute('title') 
-                  + '",\n"creator": "' 
-                  + this.getAttribute('creator') 
-                  + '",\n"avatar": "' 
-                  + this.getAttribute('avatar') 
-                  + '",\n"password": "'
-                  + '",\n"tags": "'
-                  + this.getAttribute('tags')
-                  + '",\n"parent": "'
-                  + this.getAttribute('parent')
-                  +'"\n}');
+                  '{\n"title": "' +
+                  this.getAttribute('title') +
+                  '",\n"creator": "' +
+                  this.getAttribute('creator') +
+                  '",\n"avatar": "' +
+                  this.getAttribute('avatar') +
+                  '",\n"password": "' +
+                  '",\n"tags": "' +
+                  this.getAttribute('tags') +
+                  '",\n"parent": "' +
+                  this.getAttribute('parent') +
+                  '"\n}');
                 initTitle = this.title;
                 initParent = this.parent;
-                render();
-            })
-            var h = document.createElement("H1") // Create a <h1> element for avatar
+                render(makeConsole);
+            });
+            var h = document.createElement("H1"); // Create a <h1> element for avatar
             var avatar = document.createTextNode(fileData.avatar); // Create a text node
             h.appendChild(avatar);
             var t = document.createTextNode('\n' + fileData.title);
             btn.appendChild(h);
             btn.appendChild(t);
-            btn.style = 'display:initial'
+            btn.style = 'display:initial';
             folder.appendChild(btn);
         }
     });
-}
+};
 
 //clean document settings
 // initParent = 'origin';
@@ -379,14 +416,12 @@ var save = function() {
     }
     else {
         $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initParent, hash: hash }, function(data) { alert(data); });
-
-    }
-    
-}
+    }  
+};
 
 var cms = document.querySelectorAll('.CodeMirror');
 for (var i = 0; i < cms.length; i++) {
-    cms[i].style.height = '100%';
+    cms[i].style.height = '93%';
 } 
 
 //This code is necessary to prevent a UI bug when opening the console directly after opening the page but before clicking a text editor
@@ -410,16 +445,15 @@ function search() {
     for (i = 0; i < files.length; i++) {
         var b = files[i];
         if (files[i].title.toUpperCase().indexOf(filter) > -1) {
-            shown.push(files[i])
+            shown.push(files[i]);
         } else {
-            hidden.push(files[i])
-            files[i]
+            hidden.push(files[i]);
         }
     }
     for (i = 0; i < shown.length; i++) {
-        document.getElementById(shown[i].title).style = 'display:initial'
+        document.getElementById(shown[i].title).style = 'display:initial';
     }
     for (i = 0; i < hidden.length; i++) {
-        document.getElementById(hidden[i].title).style = 'display:none'
+        document.getElementById(hidden[i].title).style = 'display:none';
     }
 }

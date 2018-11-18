@@ -1,5 +1,5 @@
 <html>
-<meta name="viewport" content="width=device-width", initial-scale=1, maximum-scale=1, user-scalable=0"/>
+<meta name="viewport" content="width=device-width" , initial-scale=1, maximum-scale=1, user-scalable=0" />
 
 <head>
     <meta charset="UTF-8">
@@ -78,85 +78,109 @@
     <link rel="stylesheet" href="libs/themes/xq-light.css">
     <link rel="stylesheet" href="libs/themes/yeti.css">
     <link rel="stylesheet" href="libs/themes/zenburn.css">
+    <link rel=stylesheet href="http://codemirror.net/doc/docs.css">
+    <link rel="stylesheet" href="http://codemirror.net/addon/lint/lint.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jshint/2.9.5/jshint.min.js"></script>
+    <script src="//rawgithub.com/zaach/jsonlint/79b553fb65c192add9066da64043458981b3972b/lib/jsonlint.js"></script>
+    <script src="https://unpkg.com/csslint@1.0.5/dist/csslint.js"></script>
+    <script src="http://codemirror.net/addon/lint/lint.js"></script>
+    <script src="http://codemirror.net/addon/lint/javascript-lint.js"></script>
+    <script src="http://codemirror.net/addon/lint/json-lint.js"></script>
+    <script src="http://codemirror.net/addon/lint/css-lint.js"></script>
 </head>
-<div class="both">
-    <div class="left-go-bottom">
-        <!-- Code Editors -->
-        <div id="code_editors">
-            <!-- Tab content -->
-            <div id="htmlTab" class="tabcontent">
-                <div id="html" class="code_box">
-                    <textarea name="html"></textarea>
+
+<body onload="initializeWith('filesTab')">
+    <div class="both">
+        <div class="left-go-bottom">
+            <!-- Code Editors -->
+            <div id="code_editors">
+                <!-- Tab content -->
+                <div id="htmlTab" class="tabcontent">
+                    <div id="html" class="code_box">
+                        <textarea name="html"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div id="cssTab" class="tabcontent">
-                <div id="css" class="code_box">
-                    <textarea name="css"></textarea>
+                <div id="cssTab" class="tabcontent">
+                    <div id="css" class="code_box">
+                        <textarea name="css"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div id="jsTab" class="tabcontent">
-                <div id="js" class="code_box">
-                    <textarea name="js"></textarea>
+                <div id="jsTab" class="tabcontent">
+                    <div id="js" class="code_box">
+                        <textarea name="js"></textarea>
+                    </div>
                 </div>
-            </div>
-            <div id="readmeTab" class="tabcontent">
-                <div id="readme" class="code_box">
-                    <textarea name="readme"></textarea>
-                </div>
-            </div>
-            <div id="filesTab" class="tabcontent">
-                    <div id="pnav"></div>
-                    <div id="content">
-                    <div id="searchbar">
-                    <input type="text" id="myInput" onkeyup="search()" placeholder="Search for title..">
-                    <br>
-                    <div id="files" class="file_box">
+                <div id="readmeTab" class="tabcontent">
+                    <div id="readme" class="code_box">
+                        <textarea name="readme"></textarea>
                     </div>
                 </div>
                 
+                <div id="filesTab" class="tabcontent">
+                    <div id="pnav"></div>
+                    <div id="content">
+                        <div id="searchbar">
+                            <input type="text" id="myInput" onkeyup="search()" placeholder="Search for title..">
+                            <br>
+                            <div id="files" class="file_box">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="picsTab" class="tabcontent">
+                    <div id="pnav"></div>
+                    <div id="content">
+                        <div id="searchbar">
+                            <form target="iframe" action="upload.php" method="post" enctype="multipart/form-data">
+                                <iframe name="iframe" id="iframe" style="display:none" onload="list()" ></iframe>
+                                Select image to upload:
+                                <input type="file" name="fileToUpload" id="fileToUpload">
+                                <input type="submit" value="Upload" name="submit">
+                            </form>
+                            <div id="assets" class="file_box">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="right-go-top">
-        <!-- Sandboxing -->
-        <div id="output">
-            <iframe></iframe>
-        </div>
-        <div id="sandbox">press &#x1F3C1; to launch console</div>
-        <!-- The sandbox template -->
-        <script type="text/template" id="tplSandbox">
-            <pre class="output"></pre>
+        <div class="right-go-top">
+            <!-- Sandboxing -->
+            <div id="output">
+                <iframe></iframe>
+            </div>
+            <div id="sandbox">press &#x1F3C1; to launch console</div>
+            <!-- The sandbox template -->
+            <script type="text/template" id="tplSandbox">
+                <pre class="output"></pre>
     <div class="input">
         <textarea rows="1" placeholder="<%= placeholder %>"></textarea>
     </div>
 </script>
-        <!-- The command/result template (NB whitespace/line breaks matter inside <pre> tag): -->
-        <script type="text/template" id="tplCommand"><% if (! _hidden) { %><span class="command"><%= command %></span>
+            <!-- The command/result template (NB whitespace/line breaks matter inside <pre> tag): -->
+            <script type="text/template" id="tplCommand"><% if (! _hidden) { %><span class="command"><%= command %></span>
 <span class="prefix"><%= this.resultPrefix %></span><span class="<%= _class %>"><%= result %></span>
 <% } %></script>
-        <script src="libs/sandbox-console.js"></script>
-        <script src="script.js"></script>
+            <script src="libs/sandbox-console.js"></script>
+            <script src="script.js"></script>
+        </div>
     </div>
-</div>
-<!-- Tab links -->
-
-<div class="tab">
-    <button class="undo" onclick="undo(currentEditor)">&#x1f631;</button>
-    <button class="tablinks" onclick="openTab(event, 'htmlTab')">&#x1F3D7;</button>
-    <button class="tablinks" onclick="openTab(event, 'cssTab')">&#x1F5BC;</button>
-    <button class="tablinks" onclick="openTab(event, 'jsTab')">&#x1F412;</button>
-    <button class="tablinks" onclick="openTab(event, 'readmeTab')">&#x1f4e6;</button>
-    <button class="theme" id="theme" onclick="changeTheme()">&#x1F464;</button>
-    <button class="tablinks" onclick="openTab(event, 'filesTab')">&#x1f4c2;</button>
-    <button class="save" onclick="save()">&#x1f4be;</button>
-    <button class="outputlinks" onclick="toggle(event, 'sandbox')">&#x1F52E;</button>
-    <button class="outputlinks" onclick="toggle(event, 'output')">&#x1F4FA;</button>
-
-    <!-- <button class="fork" onclick="fork()">&#x1f35d;</button> -->
-    
-    <button class="render" onclick="render()">&#x1F3C1;</button>
-</div>
-
+    <!-- Tab links -->
+    <div class="tab">
+        <button class="undo" onclick="undo(currentEditor)">&#x1f631;</button>
+        <button class="tablinks" onclick="openTab(event, 'htmlTab')">&#x1F3D7;</button>
+        <button class="tablinks" onclick="openTab(event, 'cssTab')">&#x1F5BC;</button>
+        <button class="tablinks" onclick="openTab(event, 'jsTab')">&#x1F412;</button>
+        <button class="tablinks" onclick="openTab(event, 'readmeTab')">&#x1f4e6;</button>
+        <button class="theme" id="theme" onclick="changeTheme()">&#x1F464;</button>
+        <button class="tablinks" onclick="openTab(event, 'filesTab')">&#x1F310;</button>
+        <button class="tablinks" onclick="openTab(event, 'picsTab')">&#x1f4c2;</button>
+        <button class="save" onclick="save()">&#x1f4be;</button>
+        <button class="outputlinks" onclick="toggle(event, 'sandbox')">&#x1F52E;</button>
+<!--         <button class="outputlinks" onclick="toggle(event, 'output')">&#x1F4FA;</button> -->
+        <!-- <button class="fork" onclick="fork()">&#x1f35d;</button> -->
+        <button class="render" onclick="render(makeConsole)">&#x1F3C1;</button>
+    </div>
 </body>
+
 </html>
