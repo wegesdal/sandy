@@ -4,15 +4,12 @@
 // Acknowledgements: CodeMirror, Rishabh (CodeTheory), Javascript-Sandbox-Console (openexchangerates.com, 
 //
 
-//i have to make jsSource global so i can inject into the console sandbox to evaluate errors
-var jsSource;
-
 //
 // Rishabh, CodeTheory (author of CSSDeck.com):
 //
 
 // Base template
-var base_tpl =
+const base_tpl =
     "<!doctype html>\n" +
     "<html>\n\t" +
     "<head>\n\t\t" +
@@ -23,18 +20,18 @@ var base_tpl =
     "</body>\n" +
     "</html>";
 
-
-
-var prepareSource = function() {
-    var html = htmlEditor.getValue(),
-        css = cssEditor.getValue(),
+prepareSource = () => {
+    const html = htmlEditor.getValue(),
         readme = readmeEditor.getValue(),
         js = jsEditor.getValue();
+    let css = cssEditor.getValue(),
     src = '';
 
     jsSource = js;
-    var s = document.getElementById('sandbox');
+    const s = document.getElementById('sandbox');
     s.style.display = "none";
+    const o = document.getElementById('output');
+    o.style.filter = "none";
 
     // HTML
     src = base_tpl.replace('</body>', html + '</body>');
@@ -45,30 +42,40 @@ var prepareSource = function() {
     return src;
 };
 
-var render = function(callback) {
-    var source = prepareSource();
+render = (callback) => {
+
+    const source = prepareSource();
 
     //we need to kill old frame to release phaser resources >.<
-    var oldFrame = document.querySelector('#output iframe');
+    const oldFrame = document.querySelector('#output iframe');
     oldFrame.parentNode.removeChild(oldFrame);
 
     newFrame = document.createElement('iframe');
-    var output = document.querySelector('#output');
+    const output = document.querySelector('#output');
     output.appendChild(newFrame), iframe_doc = newFrame.contentDocument;
 
     //i edited sandbox-console.js line 95 to glue this to the iframe
     //from:  this.sandboxFrame = $('<iframe width="0" height="0"/>').css({visibility : 'hidden'}).appendTo('body')[0];
     //to:    this.sandboxFrame = document.querySelector('#output iframe');
 
-    newFrame.onload = function(){callback();};
+    newFrame.onload = function () { callback(); };
     iframe_doc.open();
     iframe_doc.write(source);
     iframe_doc.close();
     newFrame.contentWindow.focus();
 };
 
-var makeConsole = function() {
-    jQuery(document).ready(function($) {
+// this prints logs to the console
+const realConsoleLog = console.log;
+console.log = function () {
+    const message = [].join.call(arguments, " ");
+    const last = $(".output").text()
+    $(".output").text(last + '\n' + 'log: ' + message);
+    realConsoleLog.apply(console, arguments);
+};
+
+makeConsole = () => {
+    jQuery(document).ready(function ($) {
         // Create the sandbox:
         window.sandbox = new Sandbox.View({
             // these two are required:
@@ -90,22 +97,20 @@ var makeConsole = function() {
         //this also simulates the order that pages load and simulates the experience of using a console to run programs
 
     });
-    console.log(jsSource);
-    window.sandbox.model.iframeEval(jsSource);
 
-    //this hack simulates a console log in the iframe and logs it to the real console. 
-    //todo: in a loop it will only log the last item in the virtual console
-
+    // this is necessary for printing the logs to the console window
     window.sandbox.model.sandbox.console = {
-        log: function(msg) {
-
+        log: function (msg) {
             console.log(msg);
             return msg;
         }
     };
+
+    window.sandbox.model.iframeEval(jsSource);
+
 };
 
-var themes = ['3024-day', '3024-night', 'abcdef', 'ambiance-mobile',
+const themes = ['3024-day', '3024-night', 'abcdef', 'ambiance-mobile',
     'ambiance', 'base16-dark', 'base16-light', 'bespin', 'blackboard',
     'cobalt', 'colorforth', 'darcula', 'dracula',
     'duotone-dark', 'duotone-light', 'eclipse', 'elegant',
@@ -119,7 +124,7 @@ var themes = ['3024-day', '3024-night', 'abcdef', 'ambiance-mobile',
     'twilight', 'vibrant-ink', 'xq-dark', 'xq-light', 'yeti', 'zenburn'
 ];
 
-var emojiArray = [
+const emojiArray = [
 
     '🐣', '🦖', '🦆', '🐩', '🐺', '🦑', '🐢', '🐻', '🍱', '🦕',
     '🚂', '🧛', '🐬', '🐨', '🐱', '🃏', '🦉', '🦄', '🐗', '🦃',
@@ -129,7 +134,7 @@ var emojiArray = [
     '🧝‍♀️', '🧟', '🐝', '👽', '🐓', '🐰', '🍪'
 ];
 
-var emojiCodePointArray = [
+const emojiCodePointArray = [
 
     "&#x1F423;", "&#x1F996;", "&#x1F986;", "&#x1F429;", "&#x1F43A;", "&#x1F991;", "&#x1F422;", "&#x1F43B;", "&#x1F371;", "&#x1F995;",
     "&#x1F682;", "&#x1F9DB;", "&#x1F42C;", "&#x1F428;", "&#x1F431;", "&#x1F0CF;", "&#x1F989;", "&#x1F984;", "&#x1F417;", "&#x1F983;",
@@ -139,21 +144,24 @@ var emojiCodePointArray = [
     "&#x1F9DD;&#x200d;&#x2640;", "&#x1F9DF;", "&#x1F41D;", "&#x1F47D;", "&#x1F413;", "&#x1F430;", "&#x1F36A;"
 ];
 
-function getRandomInt(min, max) {
+const getRandomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-var currentThemeIndex = getRandomInt(0, 54);
+
+let currentThemeIndex = getRandomInt(0, 54);
 
 // CM OPTIONS
-var cm_opt = {
+const cm_opt = {
     mode: 'text/html',
     theme: themes[currentThemeIndex],
     gutters: ["CodeMirror-lint-markers"],
     lineNumbers: true,
-    lint: true
+    lint: {
+        esversion: 6
+    },
 };
 
-var changeTheme = function() {
+const changeTheme = () => {
     $("#theme").html(emojiCodePointArray[currentThemeIndex]);
     htmlEditor.setOption("theme", themes[currentThemeIndex]);
     cssEditor.setOption("theme", themes[currentThemeIndex]);
@@ -162,19 +170,19 @@ var changeTheme = function() {
     var obj = JSON.parse(readmeEditor.getValue());
     obj.avatar = emojiArray[currentThemeIndex];
     readmeEditor.setValue(
-      '{\n"title": "' +
-      obj.title +
-      '",\n"creator": "' +
-      obj.creator +
-      '",\n"avatar": "' +
-      obj.avatar +
-      '",\n"password": "' +
-      obj.password +
-      '",\n"tags": "' +
-      obj.tags +
-      '",\n"parent": "' +
-      obj.parent +
-      '"\n}');
+        '{\n"title": "' +
+        obj.title +
+        '",\n"creator": "' +
+        obj.creator +
+        '",\n"avatar": "' +
+        obj.avatar +
+        '",\n"password": "' +
+        obj.password +
+        '",\n"tags": "' +
+        obj.tags +
+        '",\n"parent": "' +
+        obj.parent +
+        '"\n}');
     if (currentThemeIndex < themes.length - 1) {
         currentThemeIndex++;
     } else {
@@ -189,29 +197,28 @@ cm = CodeMirror;
 //
 
 // HTML EDITOR
-var html_box = document.querySelector('#html textarea');
-var htmlEditor = cm.fromTextArea(html_box, cm_opt);
+const html_box = document.querySelector('#html textarea');
+const htmlEditor = cm.fromTextArea(html_box, cm_opt);
 
 // CSS EDITOR
 cm_opt.mode = 'css';
-var css_box = document.querySelector('#css textarea');
-var cssEditor = cm.fromTextArea(css_box, cm_opt);
+const css_box = document.querySelector('#css textarea');
+const cssEditor = cm.fromTextArea(css_box, cm_opt);
 
 // JAVASCRIPT EDITOR
 cm_opt.mode = 'javascript';
-var js_box = document.querySelector('#js textarea');
-var jsEditor = cm.fromTextArea(js_box, cm_opt);
+const js_box = document.querySelector('#js textarea');
+const jsEditor = cm.fromTextArea(js_box, cm_opt);
 
 // README EDITOR
 cm_opt.mode = 'javascript';
-var readme_box = document.querySelector('#readme textarea');
-var readmeEditor = cm.fromTextArea(readme_box, cm_opt);
+const readme_box = document.querySelector('#readme textarea');
+const readmeEditor = cm.fromTextArea(readme_box, cm_opt);
 
-var currentEditor = 'readmeTab';
-
+let currentEditor = 'readmeTab';
 
 //this is the change tab function o.O
-function openTab(evt, tabName) {
+const openTab = (evt, tabName) => {
     if (tabName === 'filesTab') {
         load();
     }
@@ -219,19 +226,15 @@ function openTab(evt, tabName) {
     if (tabName === 'picsTab') {
         list();
     }
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
     // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (let content of tabcontent) {
+        content.style.display = "none";
     }
-
     // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    const tablinks = document.getElementsByClassName("tablinks");
+    for (let tablink of tablinks) {
+        tablink.className = tablink.className.replace(" active", "");
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
@@ -245,7 +248,7 @@ function openTab(evt, tabName) {
     readmeEditor.refresh();
 }
 
-function initializeWith(startingTab) {
+initializeWith = (startingTab) => {
     if (startingTab === 'filesTab') {
         load();
     }
@@ -253,29 +256,25 @@ function initializeWith(startingTab) {
     if (startingTab === 'picsTab') {
         list();
     }
-    // Declare all variables
-    var i, tabcontent, tablinks;
 
     // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (let content of tabcontent) {
+        content.style.display = "none";
     }
 
     // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    const tablinks = document.getElementsByClassName("tablinks");
+    for (let tablink of tablinks) {
+        tablink.className = tablink.className.replace(" active", "");
     }
     document.getElementById(startingTab).style.display = "block";
     currentEditor = startingTab;
-
-
 }
 
-var toggle = function(evt, tabName) {
-    var t = document.getElementById(tabName);
-    var o = document.getElementById('output');
+toggle = (evt, tabName) => {
+    const t = document.getElementById(tabName);
+    const o = document.getElementById('output');
     if (t.style.display === "none") {
         t.style.display = "block";
     } else {
@@ -285,18 +284,17 @@ var toggle = function(evt, tabName) {
         if (t.style.display === "none") {
             o.style.filter = "none";
         }
-        if (t.style.display === "block"){
+        if (t.style.display === "block") {
             o.style.filter = "blur(2px)";
         }
     }
 };
 
-var undo = function(currentTab) {
+undo = (currentTab) => {
     var editor;
     if (currentTab == 'htmlTab') {
         editor = htmlEditor;
     } else if (currentTab == 'cssTab') {
-
         editor = cssEditor;
     } else if (currentTab == 'jsTab') {
         editor = jsEditor;
@@ -308,12 +306,11 @@ var undo = function(currentTab) {
     editor.execCommand('undo');
 };
 
-var initTitle;
-var files = [];
+// var initTitle;
+// var files = [];
 
-var list = function() {
-    $.get('list.php', {}, function(data) {
-        console.log(data);
+list = () => {
+    $.get('list.php', {}, function (data) {
         var folder = document.getElementById('assets');
         while (folder.firstChild) {
             folder.removeChild(folder.firstChild);
@@ -325,67 +322,64 @@ var list = function() {
         var ul = document.createElement("ul");
         folder.appendChild(ul)
         var assets = eval(data);
-        for(var i = 0; i < assets.length; i++) 
-        {
+        for (var i = 0; i < assets.length; i++) {
 
-        var li = document.createElement("li");
-        var t = document.createTextNode(assets[i]);
-        li.appendChild(t);
-        ul.appendChild(li);
-
+            var li = document.createElement("li");
+            var t = document.createTextNode(assets[i]);
+            li.appendChild(t);
+            ul.appendChild(li);
         }
     });
 };
 
-var load = function() {
-    $.get('load.php', {}, function(data) {
+load = () => {
+    $.get('load.php', {}, function (data) {
         //data comes in as a string holding an array of JSON objects
-        var fileString = data;
+        const fileString = data;
         //eval returns the array 
         files = eval(fileString);
-        var folder = document.getElementById('files');
+        const folder = document.getElementById('files');
         while (folder.firstChild) {
             folder.removeChild(folder.firstChild);
         }
-        for (var i = 0; i < files.length; i++) {
-            fileData = files[i];
-            var btn = document.createElement('BUTTON');
+        for (let file of files) {
+            const btn = document.createElement('BUTTON');
             btn.className = 'file';
-            btn.setAttribute('title', fileData.title);
-            btn.setAttribute('creator', fileData.creator);
-            btn.setAttribute('avatar', fileData.avatar);
-            btn.setAttribute('html', fileData.html);
-            btn.setAttribute('css', fileData.css);
-            btn.setAttribute('js', fileData.js);
-            btn.setAttribute('readme', fileData.readme);
-            btn.setAttribute('tags', fileData.tags);
-            btn.setAttribute('parent', fileData.parent);
-            btn.setAttribute('id', fileData.title);
-            btn.addEventListener('click', function() {
+            btn.setAttribute('title', file.title);
+            btn.setAttribute('creator', file.creator);
+            btn.setAttribute('avatar', file.avatar);
+            btn.setAttribute('html', file.html);
+            btn.setAttribute('css', file.css);
+            btn.setAttribute('js', file.js);
+            btn.setAttribute('readme', file.readme);
+            btn.setAttribute('tags', file.tags);
+            btn.setAttribute('parent', file.parent);
+            btn.setAttribute('id', file.title);
+            btn.addEventListener('click', function () {
                 htmlEditor.setValue(Base64.decode(this.getAttribute('html')));
                 cssEditor.setValue(Base64.decode(this.getAttribute('css')));
                 jsEditor.setValue(Base64.decode(this.getAttribute('js')));
                 readmeEditor.setValue(
-                  '{\n"title": "' +
-                  this.getAttribute('title') +
-                  '",\n"creator": "' +
-                  this.getAttribute('creator') +
-                  '",\n"avatar": "' +
-                  this.getAttribute('avatar') +
-                  '",\n"password": "' +
-                  '",\n"tags": "' +
-                  this.getAttribute('tags') +
-                  '",\n"parent": "' +
-                  this.getAttribute('parent') +
-                  '"\n}');
+                    '{\n"title": "' +
+                    this.getAttribute('title') +
+                    '",\n"creator": "' +
+                    this.getAttribute('creator') +
+                    '",\n"avatar": "' +
+                    this.getAttribute('avatar') +
+                    '",\n"password": "' +
+                    '",\n"tags": "' +
+                    this.getAttribute('tags') +
+                    '",\n"parent": "' +
+                    this.getAttribute('parent') +
+                    '"\n}');
                 initTitle = this.title;
                 initParent = this.parent;
                 render(makeConsole);
             });
-            var h = document.createElement("H1"); // Create a <h1> element for avatar
-            var avatar = document.createTextNode(fileData.avatar); // Create a text node
+            const h = document.createElement("H1"); // Create a <h1> element for avatar
+            const avatar = document.createTextNode(file.avatar); // Create a text node
             h.appendChild(avatar);
-            var t = document.createTextNode('\n' + fileData.title);
+            const t = document.createTextNode('\n' + file.title);
             btn.appendChild(h);
             btn.appendChild(t);
             btn.style = 'display:initial';
@@ -402,58 +396,61 @@ cssEditor.setValue('body { color: red; background: white }');
 readmeEditor.setValue('{\n"title": "untitled",\n"creator": "anonymous",\n"avatar": "' + String.fromCodePoint(0x1F464) + '",\n"password": "",\n' + '"tags": "",\n"parent": ""\n}');
 //js editor begins as an empty vessel
 
-var save = function() {
-    var html = Base64.encode(htmlEditor.getValue());
-    var css = Base64.encode(cssEditor.getValue());
-    var js = Base64.encode(jsEditor.getValue());
-    var obj = JSON.parse(readmeEditor.getValue());
-    var stringToHash = obj.title + obj.creator + obj.password + "molly";
-    var hash = MD5(stringToHash);
-    var t;
+save = () => {
+    const html = Base64.encode(htmlEditor.getValue());
+    const css = Base64.encode(cssEditor.getValue());
+    const js = Base64.encode(jsEditor.getValue());
+    const obj = JSON.parse(readmeEditor.getValue());
+    const stringToHash = obj.title + obj.creator + obj.password + "molly";
+    const hash = MD5(stringToHash);
+//    const t;
     if (obj.title != initTitle) {
-        $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initTitle, hash: hash }, function(data) { alert(data); });
+        $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initTitle, hash: hash }, function (data) { alert(data); });
 
     }
     else {
-        $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initParent, hash: hash }, function(data) { alert(data); });
-    }  
+        $.post("save.php", { title: obj.title, creator: obj.creator, avatar: obj.avatar, html: html, css: css, js: js, password: obj.password, tags: obj.tags, parent: initParent, hash: hash }, function (data) { alert(data); });
+    }
 };
 
-var cms = document.querySelectorAll('.CodeMirror');
-for (var i = 0; i < cms.length; i++) {
-    cms[i].style.height = '93%';
-} 
+const editors = document.querySelectorAll('.CodeMirror');
+for (let editor of editors) {
+    editor.style.height = '100%';
+}
 
-//This code is necessary to prevent a UI bug when opening the console directly after opening the page but before clicking a text editor
-// A $( document ).ready() block.
-$(document).ready(function() {
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    document.getElementById('readmeTab').style.display = "block";
-    // evt.currentTarget.className += "active";
-});
-
-
-function search() {
+search = () => {
     shown = [];
     hidden = [];
     input = document.getElementById('myInput');
     filter = input.value.toUpperCase();
 
-    for (i = 0; i < files.length; i++) {
-        var b = files[i];
-        if (files[i].title.toUpperCase().indexOf(filter) > -1) {
-            shown.push(files[i]);
+    for (let file of files) {
+        if (file.title.toUpperCase().indexOf(filter) > -1) {
+            shown.push(file);
         } else {
-            hidden.push(files[i]);
+            hidden.push(file);
         }
     }
-    for (i = 0; i < shown.length; i++) {
-        document.getElementById(shown[i].title).style = 'display:initial';
+    for (let show of shown) {
+        document.getElementById(show.title).style = 'display:initial';
     }
-    for (i = 0; i < hidden.length; i++) {
-        document.getElementById(hidden[i].title).style = 'display:none';
+    for (let hide of hidden) {
+        document.getElementById(hide.title).style = 'display:none';
     }
+}
+
+//This code is necessary to prevent a UI bug when opening the console directly after opening the page but before clicking a text editor
+// A $( document ).ready() block.
+$(document).ready(function () {
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (let content of tabcontent) {
+        content.style.display = "none";
+    }
+    document.getElementById('readmeTab').style.display = "block";
+    // evt.currentTarget.className += "active";
+});
+
+function newFunction() {
+    var editor;
+    return editor;
 }

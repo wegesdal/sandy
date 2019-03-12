@@ -53,13 +53,16 @@ html, body {
 }
 
 ul {
-    border-left: 1px dotted black;
+    border-left: 1px dotted red;
     list-style-type: none;
     padding: 10px 20px;
 }
 
 .progress { display: none; }
 
+#sandbox{
+  overflow: scroll;
+}
 #content{
   width: 97%;
   margin-top: 1%;
@@ -111,6 +114,7 @@ ul {
 
 #content{
   margin: 0% 1% 1% 1%;
+  height: 95%;
   width: auto;
   background: #C0C0C0;
   padding: 3% 3% 3% 3%;
